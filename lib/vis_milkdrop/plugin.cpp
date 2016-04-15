@@ -485,6 +485,10 @@ Order of Function Calls
 #include <assert.h>
 //#include "../XmlDocument.h"
 
+#include "kodi/libXBMC_addon.h"
+
+extern libXBMC_addon* KODI;
+
 #define FRAND ((rand() % 7381)/7380.0f)
 #define strnicmp _strnicmp
 #define strcmpi  _strcmpi
@@ -4734,6 +4738,10 @@ void CPlugin::SeekToPreset(char cStartChar)
 
 void CPlugin::UpdatePresetList()
 {
+        VFSDirEntry* items;
+        unsigned int numItems;
+        KODI->GetDirectory(m_szPresetDir, ".milk", &items, &numItems);
+
 	struct _finddata_t c_file;
 	long hFile;
 	//HANDLE hFindFile;
@@ -4764,12 +4772,12 @@ void CPlugin::UpdatePresetList()
 	{
 		strcat(szPath, "/");
 	}
-	strcpy(szMask, szPath);
-	strcat(szMask, "*.*");
+//	strcpy(szMask, szPath);
+//	strcat(szMask, "*.*");
 
 
-	WIN32_FIND_DATA ffd;
-	ZeroMemory(&ffd, sizeof(ffd));
+//	WIN32_FIND_DATA ffd;
+//	ZeroMemory(&ffd, sizeof(ffd));
 
     m_nRatingReadProgress = 0;
     
@@ -4779,7 +4787,7 @@ void CPlugin::UpdatePresetList()
 		m_nDirs    = 0;
 
 		// find first .MILK file
-		if( (hFile = _findfirst(szMask, &c_file )) != -1L )		// note: returns filename -without- path
+//		if( (hFile = _findfirst(szMask, &c_file )) != -1L )		// note: returns filename -without- path
 		//if( (hFindFile = FindFirstFile(szMask, &ffd )) != INVALID_HANDLE_VALUE )		// note: returns filename -without- path
 		{
 			char *p = m_szpresets;
@@ -4797,12 +4805,12 @@ void CPlugin::UpdatePresetList()
 			// find the rest
 			//while (_findnext( hFile, &c_file ) == 0)
 
-			do
+                        for (unsigned int i = 0; i < numItems; ++i)
 			{
 				bool bSkip = false;
 
 				char szFilename[512];
-				strcpy(szFilename, c_file.name);
+				strcpy(szFilename, items[i]->label);
 
 				/*if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
@@ -4815,9 +4823,9 @@ void CPlugin::UpdatePresetList()
 				else*/
 				{
 					// skip normal files not ending in ".milk"
-					int len = strlen(c_file.name);
-					if (len < 5 || strcmpi(c_file.name + len - 5, ".milk") != 0)
-						bSkip = true;					
+//					int len = strlen(c_file.name);
+//					if (len < 5 || strcmpi(c_file.name + len - 5, ".milk") != 0)
+//						bSkip = true;					
 				}
 
 				if (!bSkip)
@@ -4837,9 +4845,9 @@ void CPlugin::UpdatePresetList()
 					}
 				}
 			}
-			while(_findnext(hFile,&c_file) == 0);
+			//while(_findnext(hFile,&c_file) == 0);
 
-			_findclose( hFile );
+//			_findclose( hFile );
 
 			if (bytes_left >= 0) 
 			{
